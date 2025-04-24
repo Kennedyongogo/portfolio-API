@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const http = require("http");
 const app = require("./app");
-const database = require("./src/config/database");
+const { sequelize } = require("./src/config/database");
 
 const server = http.createServer(app);
 
@@ -12,11 +12,11 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     // Connect to database
-    await database.authenticate();
+    await sequelize.authenticate();
     console.log("Database connection established successfully");
 
     // Sync database models
-    await database.sync();
+    await sequelize.sync();
     console.log("Database models synchronized");
 
     // Start the server
