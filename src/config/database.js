@@ -1,35 +1,22 @@
+require("dotenv").config();
 const { Sequelize } = require("sequelize");
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  process.env.PGDATABASE,
+  process.env.PGUSER,
+  process.env.PGPASSWORD,
   {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+    host: process.env.PGHOST,
+    port: process.env.PGPORT,
     dialect: "postgres",
-    logging: process.env.NODE_ENV === "development" ? console.log : false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-    },
+    logging: false,
+    paranoid: true,
   }
 );
 
 sequelize
   .authenticate()
-  .then(() => {
-    console.log("Connected to database");
-    // Use force: true only in development and when you want to reset the database
-    return sequelize.sync({ force: false });
-  })
-  .then(() => {
-    console.log("Database synchronized");
-  })
-  .catch((err) => {
-    console.log("Error connecting to database", err);
-  });
+  .then(() => console.log("Database connected..."))
+  .catch((err) => console.log("Error: " + err));
 
-module.exports = sequelize;
+module.exports = { sequelize, Sequelize };
