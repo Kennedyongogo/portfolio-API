@@ -18,6 +18,7 @@ app.use(
     origin: [
       "http://38.242.243.113",
       "http://38.242.243.113:80",
+      "http://38.242.243.113:3003",
       "http://localhost:3003",
     ],
     credentials: true,
