@@ -10,5 +10,5 @@ COPY . ./
 
 RUN npm install --silent
 
-EXPOSE 5000
+EXPOSE 3003
 CMD [ "node", "server.js" ]
