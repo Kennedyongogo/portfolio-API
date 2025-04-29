@@ -50,14 +50,11 @@ const upload = multer({
 // Upload image function
 const uploadImage = async (file) => {
   try {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const filename =
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
-    const filepath = path.join("uploads", filename);
-
-    await promisify(fs.writeFile)(filepath, file.buffer);
-    return `/uploads/${filename}`;
+    // With disk storage, the file is already saved to disk by multer
+    // We just need to return the path
+    return `/${file.path.replace(/\\/g, "/")}`;
   } catch (error) {
+    console.error("Upload error:", error);
     throw new Error("Error uploading image");
   }
 };
@@ -65,11 +62,19 @@ const uploadImage = async (file) => {
 // Delete image function
 const deleteImage = async (filepath) => {
   try {
-    const fullPath = path.join(__dirname, "..", filepath);
+    if (!filepath) return;
+
+    // Remove the leading slash if present
+    const normalizedPath = filepath.startsWith("/")
+      ? filepath.substring(1)
+      : filepath;
+    const fullPath = path.join(process.cwd(), normalizedPath);
+
     if (fs.existsSync(fullPath)) {
       await promisify(fs.unlink)(fullPath);
     }
   } catch (error) {
+    console.error("Delete error:", error);
     throw new Error("Error deleting image");
   }
 };

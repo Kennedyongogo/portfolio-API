@@ -4,7 +4,9 @@ const { uploadImage, deleteImage } = require("../utils/imageUpload");
 // Get profile
 exports.getProfile = async (req, res) => {
   try {
-    const profile = await Profile.findOne().sort({ createdAt: -1 });
+    const profile = await Profile.findOne({
+      order: [["createdAt", "DESC"]],
+    });
     if (!profile) {
       return res.status(404).json({ message: "Profile not found" });
     }
@@ -14,19 +16,55 @@ exports.getProfile = async (req, res) => {
   }
 };
 
+// Update just the bio
+exports.updateBio = async (req, res) => {
+  try {
+    const { bio } = req.body;
+
+    if (!bio) {
+      return res.status(400).json({ message: "Bio field is required" });
+    }
+
+    let profile = await Profile.findOne({ order: [["createdAt", "DESC"]] });
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    profile.bio = bio;
+    await profile.save();
+
+    res.json(profile);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Update profile
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, title, bio, email, phone, location, skills, socialLinks } =
-      req.body;
+    const {
+      fullName,
+      title,
+      bio,
+      email,
+      phone,
+      location,
+      skills,
+      socialLinks,
+    } = req.body;
 
-    let profile = await Profile.findOne().sort({ createdAt: -1 });
+    let profile = await Profile.findOne({ order: [["createdAt", "DESC"]] });
     if (!profile) {
-      profile = new Profile();
+      if (!fullName || !title || !email) {
+        return res.status(400).json({
+          message:
+            "Missing required fields (fullName, title, email) for new profile creation.",
+        });
+      }
+      profile = new Profile({ fullName, title, email });
     }
 
-    // Update basic info
-    profile.name = name || profile.name;
+    profile.fullName = fullName || profile.fullName;
     profile.title = title || profile.title;
     profile.bio = bio || profile.bio;
     profile.email = email || profile.email;
@@ -35,7 +73,6 @@ exports.updateProfile = async (req, res) => {
     profile.skills = skills || profile.skills;
     profile.socialLinks = socialLinks || profile.socialLinks;
 
-    // Handle file uploads
     if (req.files) {
       if (req.files.profileImage) {
         if (profile.profileImage) {
@@ -68,14 +105,46 @@ exports.updateProfile = async (req, res) => {
 exports.updateSocialLinks = async (req, res) => {
   try {
     const { socialLinks } = req.body;
-    let profile = await Profile.findOne().sort({ createdAt: -1 });
+    console.log("Received social links:", socialLinks);
+
+    let profile = await Profile.findOne({ order: [["createdAt", "DESC"]] });
+
     if (!profile) {
-      profile = new Profile();
+      return res
+        .status(404)
+        .json({ message: "Profile not found to update social links." });
     }
-    profile.socialLinks = socialLinks;
+
+    // Get current social links and ensure it's an object
+    let currentSocialLinks = profile.socialLinks || {};
+    if (typeof currentSocialLinks !== "object" || currentSocialLinks === null) {
+      currentSocialLinks = {};
+    }
+    console.log("Current social links:", currentSocialLinks);
+
+    // Create a completely new object to avoid reference issues
+    const newSocialLinks = JSON.parse(JSON.stringify(currentSocialLinks));
+
+    // Explicitly update each provided social link
+    if (socialLinks) {
+      Object.keys(socialLinks).forEach((platform) => {
+        newSocialLinks[platform] = socialLinks[platform];
+      });
+    }
+
+    console.log("Final social links:", newSocialLinks);
+
+    // Update the profile instance
+    profile.socialLinks = newSocialLinks;
     await profile.save();
-    res.json(profile);
+
+    // Fetch the updated profile to confirm changes
+    const updatedProfile = await Profile.findByPk(profile.id);
+    console.log("Updated profile social links:", updatedProfile.socialLinks);
+
+    res.json(updatedProfile);
   } catch (error) {
+    console.error("Error updating social links:", error);
     res.status(500).json({ message: error.message });
   }
 };

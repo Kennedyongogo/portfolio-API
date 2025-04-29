@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const profileController = require("../controllers/profileController");
-const { authenticateToken } = require("../middleware/auth");
+const { authenticateToken } = require("../middleware/authMiddleware");
 const { upload } = require("../utils/imageUpload");
 
 // Public routes
 router.get("/", profileController.getProfile);
+
+// Route to update just the bio
+router.put("/bio", authenticateToken, profileController.updateBio);
 
 // Protected routes
 router.put(

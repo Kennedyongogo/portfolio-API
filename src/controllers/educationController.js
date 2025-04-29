@@ -13,7 +13,6 @@ exports.createEducation = async (req, res) => {
     res.status(500).json({ error: "Error creating education" });
   }
 };
-
 // Get all Education
 exports.getAllEducation = async (req, res) => {
   try {
