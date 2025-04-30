@@ -12,8 +12,16 @@ const contactRoutes = require("./src/routes/contactRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
 
-// Middleware
-app.use(cors());
+// CORS configuration
+app.use(
+  cors({
+    origin: ["http://38.242.243.113:3036", "http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Admin-Password"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Serve static files from the uploads directory
