@@ -13,18 +13,7 @@ const adminRoutes = require("./src/routes/adminRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
 
 // Middleware
-app.use(
-  cors({
-    origin: [
-      "http://38.242.243.113",
-      "http://38.242.243.113:80",
-      "http://38.242.243.113:3003",
-      "http://38.242.243.113:3036",
-      "http://localhost:3003",
-    ],
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 
 // Serve static files from the uploads directory
